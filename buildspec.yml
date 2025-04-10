@@ -25,7 +25,6 @@ phases:
     commands:
       - echo "Pushing the Docker image to Amazon ECR..."
       - docker push $REPOSITORY_URI:$BUILD_VERSION
-      - echo "Docker image successfully pushed with tags: $BUILD_VERSION and latest"
       - echo "Triggering image scan in ECR..."
       - aws ecr start-image-scan --repository-name $(basename $REPOSITORY_URI) --image-id imageTag=$BUILD_VERSION --region $AWS_DEFAULT_REGION
       - echo "Fetching scan findings..."

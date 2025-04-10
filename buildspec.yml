@@ -1,0 +1,53 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-south-1                    # Update if using a different region
+
+    REPOSITORY_URI: 050752605171.dkr.ecr.ap-south-1.amazonaws.com/my-python-app  # Replace with your ECR URI
+
+    BUILD_VERSION: "v1.0.0"                          # Can be overridden from CodePipeline or set to a dynamic value
+ 
+phases:
+
+  pre_build:
+
+    commands:
+
+      - echo "Logging in to Amazon ECR..."
+
+      - aws --version
+
+      - $(aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI)
+
+      - echo "Build version is $BUILD_VERSION"
+
+  build:
+
+    commands:
+
+      - echo "Building the Docker image..."
+
+      - docker build -t $REPOSITORY_URI:$BUILD_VERSION .
+
+      - docker tag $REPOSITORY_URI:$BUILD_VERSION $REPOSITORY_URI:latest
+
+  post_build:
+
+    commands:
+
+      - echo "Pushing the Docker image to Amazon ECR..."
+
+      - docker push $REPOSITORY_URI:$BUILD_VERSION
+
+      - docker push $REPOSITORY_URI:latest
+
+      - echo "Docker image successfully pushed with tags: $BUILD_VERSION and latest"
+ 
+artifacts:
+
+  files:
+
+    - '**/*'
+
+ 

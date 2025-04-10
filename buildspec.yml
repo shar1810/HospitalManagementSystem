@@ -40,9 +40,15 @@ phases:
 
       - docker push $REPOSITORY_URI:$BUILD_VERSION
 
-      - docker push $REPOSITORY_URI:latest
-
       - echo "Docker image successfully pushed with tags: $BUILD_VERSION and latest"
+
+      - echo "Triggering image scan in ECR..."
+      
+      - aws ecr start-image-scan --repository-name my-app --image-id imageTag=$BUILD_VERSION --region $AWS_DEFAULT_REGION
+      
+      - echo "Fetching scan findings..."
+      
+      - aws ecr describe-image-scan-findings --repository-name my-app --image-id imageTag=$BUILD_VERSION --region $AWS_DEFAULT_REGION
  
 artifacts:
 
